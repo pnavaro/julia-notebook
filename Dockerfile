@@ -2,6 +2,17 @@ FROM quay.io/jupyteronopenshift/s2i-minimal-notebook-py36:2.5.1
 
 USER root
 
+COPY . /tmp/src
+
+RUN rm -rf /tmp/src/.git* && \
+    chown -R 1001 /tmp/src && \
+    chgrp -R 0 /tmp/src && \
+    chmod -R g+w /tmp/src && \
+    rm -rf /tmp/scripts && \
+    mv /tmp/src/.s2i/bin /tmp/scripts
+
+ENV XDG_CACHE_HOME=/opt/app-root/src/.cache
+
 ARG julia_version="1.5.3"
 ARG julia_checksum="f190c938dd6fed97021953240523c9db448ec0a6760b574afd4e9924ab5615f1"
 ENV JULIA_DEPOT_PATH=/opt/julia \
@@ -19,25 +30,17 @@ RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
 
 RUN mkdir /etc/julia && \
     mkdir "${JULIA_PKGDIR}" && \
-    chown "${NB_USER}" "${JULIA_PKGDIR}" && \
+    chown 1001 "${JULIA_PKGDIR}" && \
     fix-permissions "${JULIA_PKGDIR}"
-
-COPY . /tmp/src
-
-RUN rm -rf /tmp/src/.git* && \
-    chown -R 1001 /tmp/src && \
-    chgrp -R 0 /tmp/src && \
-    chmod -R g+w /tmp/src && \
-    rm -rf /tmp/scripts && \
-    mv /tmp/src/.s2i/bin /tmp/scripts
-
-ENV XDG_CACHE_HOME=/opt/app-root/src/.cache
 
 USER 1001
 
-RUN /tmp/scripts/assemble
 
 RUN julia -e 'using Pkg; Pkg.update(); Pkg.add("IJulia"); ' && \
     julia -e 'using IJulia; ' 
+
+WORKDIR $HOME
+
+RUN /tmp/scripts/assemble
 
 CMD [ "/opt/app-root/builder/run" ]

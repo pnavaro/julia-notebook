@@ -21,7 +21,7 @@ Deploying the Minimal Notebook
 To deploy the minimal notebook image run the following commands:
 
 ```
-oc new-app s2i-minimal-notebook:3.6 --name minimal-notebook \
+oc new-app https://github.com/pnavaro/julia-notebook --name minimal-notebook \
     --env JUPYTER_NOTEBOOK_PASSWORD=mypassword
 ```
 
@@ -44,10 +44,9 @@ oc delete all --selector app=minimal-notebook
 To use the S2I build process to create an image, run the command:
 
 ```
-oc new-build --name julia-notebook \
+oc new-build --name minimal-notebook \
   --image-stream s2i-minimal-notebook:3.6 \
-  --code https://github.com/jupyter-on-openshift/jupyter-notebooks \
-  --context-dir scipy-notebook
+  --code https://github.com/pnavaro/julia-notebook
 ```
 
 If any build of a custom image fails because the default memory limit on builds in your OpenShift cluster is too small, you can increase the limit by running:
