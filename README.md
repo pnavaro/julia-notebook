@@ -23,10 +23,11 @@ To deploy the minimal notebook image run the following commands:
 ```
 oc new-app https://github.com/pnavaro/julia-notebook --name minimal-notebook \
     --env JUPYTER_NOTEBOOK_PASSWORD=mypassword
+oc logs -f bc/minimal-notebook
+oc create route edge minimal-notebook --service minimal-notebook --insecure-policy Redirect
 ```
 
 The ``JUPYTER_NOTEBOOK_PASSWORD`` environment variable will allow you to access the notebook instance with a known password.
-
 
 ```
 oc get route/minimal-notebook
